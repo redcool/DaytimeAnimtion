@@ -1,20 +1,23 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-
-public class DaytimeAnimationMaterialColor : BaseAnimationProperty
+﻿namespace PowerUtilities
 {
+    using System;
+    using System.Collections;
+    using System.Collections.Generic;
+    using UnityEngine;
 
-    [ColorUsage(true,true)]public Color color = Color.white;
 
-
-    public override void OnAnimationUpdate()
+    public class DaytimeAnimationMaterialColor : BaseAnimationProperty
     {
-        base.OnAnimationUpdate();
 
-        if (mat)
-            mat.SetColor(propName, color);
+        [ColorUsage(true, true)] public Color color = Color.white;
+
+
+        public override void OnAnimationUpdate()
+        {
+            base.OnAnimationUpdate();
+
+            if (mat)
+                mat.SetColor(propName, color);
+        }
     }
 }

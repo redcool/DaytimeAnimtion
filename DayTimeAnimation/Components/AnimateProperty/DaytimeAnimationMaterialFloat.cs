@@ -1,16 +1,19 @@
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-
-public class DaytimeAnimationMaterialFloat : BaseAnimationProperty
+namespace PowerUtilities
 {
-    public float propValue;
-    public override void OnAnimationUpdate()
+    using System.Collections;
+    using System.Collections.Generic;
+    using UnityEngine;
+
+    public class DaytimeAnimationMaterialFloat : BaseAnimationProperty
     {
-        base.OnAnimationUpdate();
-        if (mat)
+        public float propValue;
+        public override void OnAnimationUpdate()
         {
-            mat.SetFloat(propName, propValue);
+            base.OnAnimationUpdate();
+            if (mat)
+            {
+                mat.SetFloat(propName, propValue);
+            }
         }
     }
 }
