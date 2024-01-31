@@ -1,8 +1,39 @@
 ﻿namespace PowerUtilities
 {
     using System;
+
     using UnityEngine;
     using UnityEngine.Playables;
+
+#if UNITY_EDITOR
+    using UnityEditor;
+    [CustomEditor(typeof(DayTimeAnimationItem))]
+    public class DayTimeAnimationItemEditor: Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            var inst = target as DayTimeAnimationItem;
+
+            inst.isShowDaytimeDriver = EditorGUILayout.BeginFoldoutHeaderGroup(inst.isShowDaytimeDriver, "Daytime Driver");
+
+            if (inst.isShowDaytimeDriver)
+            {
+                if (!EditorApplication.isPlaying)
+                {
+                    EditorGUILayout.LabelField("Daytime Driver only show when Playing");
+                }
+                else
+                {
+
+                    EditorGUILayout.ObjectField(DayTimeAnimationDriver.Instance, typeof(GameObject), true);
+                }
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+        }
+    }
+#endif
+
     /// <summary>
     /// 24h动画播放控制项
     /// 2021.03.17 重构
@@ -16,6 +47,10 @@
         PlayableDirector director;
         Animation anim;
         Animator animator;
+
+
+        [HideInInspector]
+        public bool isShowDaytimeDriver;
 
         private void Awake()
         {
@@ -33,6 +68,8 @@
         void InitAnimator()
         {
             animator = GetComponent<Animator>();
+            if (!animator)
+                return;
             animator.enabled = false;
         }
 
@@ -45,6 +82,7 @@
             // stop animation's play
             anim.playAutomatically = false;
             anim.Stop();
+            anim.enabled = false;
         }
 
         private void InitPlayableDirector()

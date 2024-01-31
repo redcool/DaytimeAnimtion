@@ -4,6 +4,43 @@
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
+
+#if UNITY_EDITOR
+    using UnityEditor;
+    [CustomEditor(typeof(DayTimeAnimationDriver))]
+    public class DayTimeAnimationDriverEditor : Editor
+    {
+        public override void OnInspectorGUI()
+        {
+            base.OnInspectorGUI();
+            var inst = (DayTimeAnimationDriver)target;
+
+
+            ShowExistItems(inst);
+
+        }
+
+        void ShowExistItems(DayTimeAnimationDriver inst)
+        {
+            inst.isShowDaytimeItems = EditorGUILayout.BeginFoldoutHeaderGroup(inst.isShowDaytimeItems, "DayTime Items");
+
+            if (inst.isShowDaytimeItems)
+            {
+                if (!EditorApplication.isPlaying)
+                {
+                    EditorGUILayout.LabelField("Daytime Items only show when Playing");
+                }
+
+                foreach (var item in DayTimeAnimationDriver.AnimList)
+                {
+                    EditorGUILayout.ObjectField(item, typeof(GameObject), true);
+                }
+            }
+            EditorGUILayout.EndFoldoutHeaderGroup();
+        }
+    }
+#endif
+
     /// <summary>
     /// 控制动画按时间(24h)进行播放
     /// </summary>
@@ -13,6 +50,9 @@
         {
             Frame1 = 1, Frame2 = 2, Frame4 = 4, Frame8 = 8, Frame16 = 16
         }
+
+
+        [Header("2.0.1")]
         [Header("(游戏)一天是(现实中)多少秒?")]
         [Min(1)]
         public float secondsADay = 30;
@@ -29,7 +69,11 @@
 
         float elapsedSecs;
         [Header("Debug Info")]
-        [SerializeField] float hour;
+        public float hour;
+
+        [HideInInspector]
+        public bool isShowDaytimeItems;
+
         public static DayTimeAnimationDriver Instance;
 
         public static event Action OnAnimationUpdate;
@@ -37,6 +81,7 @@
         int currentFrame;
 
         static List<DayTimeAnimationItem> animList = new List<DayTimeAnimationItem>();
+        public static List<DayTimeAnimationItem> AnimList => animList;
         public static void Add(DayTimeAnimationItem item)
         {
             if (!animList.Contains(item))
