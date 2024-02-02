@@ -1,3 +1,16 @@
 {
-	"name": "DayTimeAnimation"
+    "name": "DayTimeAnimation",
+    "rootNamespace": "",
+    "references": [
+        "GUID:5a5cc6c9cee917248a0beb2ae4b4170f"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
 }

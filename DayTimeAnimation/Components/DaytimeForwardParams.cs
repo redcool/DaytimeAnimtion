@@ -14,19 +14,23 @@
     {
         public bool isUpdateAmbient;
         [Header("Tri colors")]
-        public Color ambientSkyColor;
-        public Color ambientEquatorColor,ambientGroundColor;
+        [ColorUsage(false,true)] public Color ambientSkyColor;
+        [ColorUsage(false, true)] public Color ambientEquatorColor,ambientGroundColor;
 
         [Header("Mode")]
         public AmbientMode ambientMode = AmbientMode.Skybox;
 
         [Header("Ambient")]
         public float ambientIntensity = 1;
+
+        [ColorUsage(false, true)]
         public Color ambientLight;
 
-        //[Header("AmbientProbe")]
-        //public bool isUpdateAmbientProbe;
+        [Header("AmbientProbe")]
+        public bool isUpdateAmbientProbe;
         //public SphericalHarmonicsL2 ambientProbe;
+        public Color shAmbientLight;
+        public Light shLight;
     }
 
     [Serializable]
@@ -64,6 +68,23 @@
         [Header("--- Unity Fog")]
         public UnityFogInfo fogInfo = new UnityFogInfo();
 
+        private void OnEnable()
+        {
+            RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
+            RenderPipelineManager.beginCameraRendering += RenderPipelineManager_beginCameraRendering;
+        }
+        private void OnDisable()
+        {
+            RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
+        }
+
+        private void RenderPipelineManager_beginCameraRendering(ScriptableRenderContext arg1, Camera cam)
+        {
+            //if (cam.CompareTag("MainCamera"))
+            {
+                UpdateAmbientProbe(ambientInfo);
+            }
+        }
 
         // Update is called once per frame
         void Update()
@@ -73,37 +94,46 @@
                 return;
             frameCount = 0;
 
-            if (ambientInfo!=null && ambientInfo.isUpdateAmbient)
-                UpdateAmbient(ambientInfo);
-
-            if(fogInfo != null && fogInfo.isUpdateFog)
-                UpdateFog(fogInfo);
+            UpdateAmbient(ambientInfo);
+            UpdateFog(fogInfo);
         }
 
         private void UpdateAmbient(AmbientInfo info)
         {
+            if (info == null || !info.isUpdateAmbient)
+                return;
+
             RenderSettings.ambientSkyColor = info.ambientSkyColor;
             RenderSettings.ambientEquatorColor = info.ambientEquatorColor;
             RenderSettings.ambientGroundColor = info.ambientGroundColor;
             RenderSettings.ambientIntensity = info.ambientIntensity;
             RenderSettings.ambientLight = info.ambientLight;
             RenderSettings.ambientMode = info.ambientMode;
-
-            //if(info.isUpdateAmbientProbe)
-            //    RenderSettings.ambientProbe = info.ambientProbe;
         }
 
-        void EnableFog(bool isEnalbed)
+        private static void UpdateAmbientProbe(AmbientInfo info)
         {
-            RenderSettings.fog = isEnalbed;
-            //Shader.SetGlobalInt(WeatherShader.IS_FOG_ON, fogEnabled ? 1 : 0);
+            if (info == null || !info.isUpdateAmbientProbe)
+                return;
+
+            var probe = RenderSettings.ambientProbe;
+            probe.Clear();
+            probe.AddAmbientLight(info.shAmbientLight);
+            if (info.shLight)
+                probe.AddLight(info.shLight, Vector3.zero);
+
+            RenderSettings.ambientProbe = probe;
         }
 
         private void UpdateFog(UnityFogInfo fogInfo)
         {
+            if(fogInfo == null || !fogInfo.isUpdateFog)
+                return;
+
+            RenderSettings.fog = fogInfo.fogEnabled;
+
             RenderSettings.fogEndDistance = fogInfo.fogEndDistance;
             RenderSettings.fogStartDistance = fogInfo.fogStartDistance;
-            EnableFog(fogInfo.fogEnabled);
 
             RenderSettings.fogColor = fogInfo.fogColor;
             RenderSettings.fogMode = fogInfo.fogMode;
