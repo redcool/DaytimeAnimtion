@@ -5,6 +5,7 @@
     using System.Collections.Generic;
     using UnityEngine;
     using UnityEngine.Rendering;
+    using UnityEngine.UI;
 
     /// <summary>
     /// RenderSettings.ambientXXX
@@ -27,8 +28,9 @@
         public Color ambientLight;
 
         [Header("AmbientProbe")]
-        public bool isUpdateAmbientProbe;
-        //public SphericalHarmonicsL2 ambientProbe;
+        public bool isUpdateAmbientProbe; 
+        [HideInInspector]
+        public SphericalHarmonicsL2 lastAmbientProbe;
         public Color shAmbientLight;
         public Light shLight;
     }
@@ -72,6 +74,9 @@
         {
             RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
             RenderPipelineManager.beginCameraRendering += RenderPipelineManager_beginCameraRendering;
+
+            // keep last probe
+            ambientInfo.lastAmbientProbe = RenderSettings.ambientProbe;
         }
         private void OnDisable()
         {
@@ -116,8 +121,7 @@
             if (info == null || !info.isUpdateAmbientProbe)
                 return;
 
-            var probe = RenderSettings.ambientProbe;
-            probe.Clear();
+            var probe = info.lastAmbientProbe;
             probe.AddAmbientLight(info.shAmbientLight);
             if (info.shLight)
                 probe.AddLight(info.shLight, Vector3.zero);
