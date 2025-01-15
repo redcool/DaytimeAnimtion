@@ -53,14 +53,9 @@ namespace PowerUtilities
         [MenuItem(MATERIAL_PATH + "附加 Material Color到选择节点")]
         static void AttachMaterialColor()
         {
-            AttachComponent<DaytimeAnimationMaterialColor>(Selection.activeGameObject);
+            AttachComponent<DaytimeMaterialUpdate>(Selection.activeGameObject);
         }
 
-        [MenuItem(MATERIAL_PATH + "附加 Material Float到选择节点")]
-        static void AttachMaterialFloat()
-        {
-            AttachComponent<DaytimeAnimationMaterialFloat>(Selection.activeGameObject);
-        }
 
         [MenuItem(FOG_PROP_PATH + "环境(Fog,Ambient)")]
         static void AttachForwardParams()
