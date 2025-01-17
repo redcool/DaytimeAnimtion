@@ -596,19 +596,13 @@ MonoBehaviour:
     e32: 0
     e33: 0
   mat: {fileID: 2100000, guid: 0724f058284ae5f44871a83c7758aed3, type: 2}
-  isRunInUpdate: 1
-  floatValues:
-  - name: 
-    value: 0
-  vectorValues:
-  - name: 
-    value: {x: 0, y: 0, z: 0, w: 0}
+  isRunInUpdate: 0
+  floatValues: []
+  vectorValues: []
   colorValues:
   - name: _BaseColor
-    value: {r: 1, g: 0, b: 0, a: 0}
-  textureValues:
-  - name: 
-    value: {fileID: 0}
+    value: {r: 0.5698112, g: 0.5698112, b: 0.5698112, a: 0}
+  textureValues: []
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
