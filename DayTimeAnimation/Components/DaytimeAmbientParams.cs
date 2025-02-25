@@ -20,10 +20,17 @@
         [Min(1)] public int updateFrameCount = 3;
         int frameCount;
 
+        [EditorButton(onClickCall = "SaveSceneInfos")]
+        [Tooltip("save current scene Amibent and fog")]
+        public bool isSaveSceneInfos;
+            
+        //private
+        bool lastIsUpdateAmbient, lastIsUpdateFog;
         /// <summary>
         /// Ambient Settings
         /// </summary>
         [Header("--- Ambient Settings")]
+        [Tooltip("uncheck use sceneAmbientInfo")]
         public bool isUpdateAmbient;
         [Tooltip("Tri colors")]
         [ColorUsage(false, true)] public Color ambientSkyColor;
@@ -53,6 +60,7 @@
         /// Fog info
         /// </summary>
         [Header("--- Unity Fog")]
+        [Tooltip("uncheck,use sceneFogInfo")]
         public bool isUpdateFog;
         [Header("Fog")]
         public bool fogEnabled;
@@ -75,11 +83,12 @@
         /// </summary>
         UnityFogInfo fogInfo = new();
 
+        [Header("Debug")]
         /// <summary>
         /// current RenderSettings params
         /// </summary>
-        AmbientInfo sceneAmbientInfo = new() { isUpdateAmbient = true };
-        UnityFogInfo sceneFogInfo = new() { isUpdateFog = true };
+        public AmbientInfo sceneAmbientInfo = new() { isUpdateAmbient = true };
+        public UnityFogInfo sceneFogInfo = new() { isUpdateFog = true };
 
         private void OnEnable()
         {
@@ -110,6 +119,12 @@
             sceneFogInfo.SaveFog();
         }
 
+        public void RestoreSceneInfos()
+        {
+            sceneAmbientInfo.ApplyAmbient();
+            sceneFogInfo.ApplyFog();
+        }
+
         private void RenderPipelineManager_beginCameraRendering(ScriptableRenderContext arg1, Camera cam)
         {
             //if (cam.CompareTag("MainCamera"))
@@ -121,11 +136,29 @@
         // Update is called once per frame
         void Update()
         {
-            //frameCount++;
-            //if (frameCount < updateFrameCount)
-            //    return;
-            //frameCount = 0;
+            frameCount++;
+            if (frameCount < updateFrameCount)
+                return;
+            frameCount = 0;
 
+            UpdateAmbients();
+        }
+
+        private void LateUpdate()
+        {
+            if (CompareTools.CompareAndSet(ref lastIsUpdateAmbient, ref isUpdateAmbient) && !lastIsUpdateAmbient)
+            {
+                sceneAmbientInfo.ApplyAmbient();
+            }
+
+            if(CompareTools.CompareAndSet(ref lastIsUpdateFog,ref isUpdateFog) && !lastIsUpdateFog)
+            {
+                sceneFogInfo.ApplyFog();
+            }
+        }
+
+        private void UpdateAmbients()
+        {
             // update params
             ambientInfo.Update(this);
             fogInfo.Update(this);
@@ -137,7 +170,5 @@
             if (fogInfo.isUpdateFog)
                 fogInfo.ApplyFog();
         }
-
-
     }
 }
