@@ -64,7 +64,7 @@
         [HideInInspector]
         public SphericalHarmonicsL2 lastAmbientProbe;
         public Color shAmbientLight;
-        public Light shLight;
+        public Light[] shLights;
 
 
         /// <summary>

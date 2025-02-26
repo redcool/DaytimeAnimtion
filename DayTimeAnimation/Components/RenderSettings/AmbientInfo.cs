@@ -41,7 +41,7 @@
         [HideInInspector]
         public SphericalHarmonicsL2 lastAmbientProbe;
         public Color shAmbientLight;
-        public Light shLight;
+        public Light[] shLights;
 
         /// <summary>
         /// Save RenderSettings params
@@ -99,8 +99,16 @@
         {
             var probe = lastAmbientProbe;
             probe.AddAmbientLight(shAmbientLight);
-            if (shLight)
-                probe.AddLight(shLight, Vector3.zero);
+            if (shLights != null)
+            {
+                foreach (var shLight in shLights)
+                {
+                    if (!shLight)
+                        continue;
+
+                    probe.AddLight(shLight, Vector3.zero);
+                }
+            }
 
             RenderSettings.ambientProbe = probe;
         }
