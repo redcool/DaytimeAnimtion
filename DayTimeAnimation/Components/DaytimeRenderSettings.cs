@@ -6,44 +6,58 @@
     using UnityEngine;
     using UnityEngine.Rendering;
     using UnityEngine.SceneManagement;
-    using UnityEngine.UI;
 
     /// <summary>
     /// DaytimeAnimation 间接控制的unity属性
     /// 比如 RenderSettings的属性
     /// </summary>
     [ExecuteInEditMode]
-    public class DaytimeAmbientParams : MonoBehaviour
+    public class DaytimeRenderSettings : MonoBehaviour
     {
+        [HelpBox]
+        [SerializeField]
+        string helpBox = "check(IsUpdateAmbient,IsUpdateFog,IsUpdateAmbientProbe) will start update RenderSettings, uncheck will use SceneAmbientInfo";
+
         [Header("Upadte Frequency")]
         [Tooltip("how many frames update once")]
         [Min(1)] public int updateFrameCount = 3;
         int frameCount;
 
-        [EditorButton(onClickCall = "SaveSceneInfos")]
+        [EditorButton(onClickCall = "SaveSceneInfos",text = "SaveSceneRenderSettings")]
         [Tooltip("save current scene Amibent and fog")]
-        public bool isSaveSceneInfos;
+        public bool isSaveSceneRenderSettings;
             
-        //private
         bool lastIsUpdateAmbient, lastIsUpdateFog;
         /// <summary>
         /// Ambient Settings
         /// </summary>
-        [Header("--- Ambient Settings")]
+        [Header("--- RenderSettings/Envronment")]
         [Tooltip("uncheck use sceneAmbientInfo")]
         public bool isUpdateAmbient;
+        [Tooltip("Mode")]
+        public AmbientMode ambientMode = AmbientMode.Skybox;
         [Tooltip("Tri colors")]
         [ColorUsage(false, true)] public Color ambientSkyColor;
         [ColorUsage(false, true)] public Color ambientEquatorColor, ambientGroundColor;
 
-        [Tooltip("Mode")]
-        public AmbientMode ambientMode = AmbientMode.Skybox;
 
         [Tooltip("Ambient")]
         public float ambientIntensity = 1;
 
         [ColorUsage(false, true)]
         public Color ambientLight;
+
+        public Material skyboxMat;
+        public Light sunSource;
+
+        public Color subtractiveShadowColor;
+        public float haloStrength;
+        public float flareStrength;
+        public int reflectionBounces;
+        public float reflectionIntensity;
+        public Texture customReflectionTexture;
+        public DefaultReflectionMode defaultReflectionMode;
+        public int defaultReflectionResolution;
 
         [Header("AmbientProbe")]
         public bool isUpdateAmbientProbe;
@@ -52,27 +66,25 @@
         public Color shAmbientLight;
         public Light shLight;
 
-        [Header("Env")]
-        public Material skyboxMat;
-        public Light sunSource;
 
         /// <summary>
         /// Fog info
         /// </summary>
-        [Header("--- Unity Fog")]
+        [Header("--- RenderSettings/Fog")]
         [Tooltip("uncheck,use sceneFogInfo")]
         public bool isUpdateFog;
-        [Header("Fog")]
+        [Header("Fog Settings")]
         public bool fogEnabled;
         [ColorUsage(false,true)]public Color fogColor = Color.gray;
         public FogMode fogMode = FogMode.Linear;
 
-        [Tooltip("Linear Fog")]
+        [Tooltip("Linear Fog start")]
         public float fogStartDistance = 10;
+        [Tooltip("Linear Fog end")]
         public float fogEndDistance = 100;
 
-        [Tooltip("Exp Fog")]
-        public float fogDentisy = 0.01f;
+        [Tooltip("Exp Fog use")]
+        public float fogDensity = 0.01f;
 
         /// <summary>
         /// current ambient info
@@ -83,21 +95,24 @@
         /// </summary>
         UnityFogInfo fogInfo = new();
 
-        [Header("Debug")]
+        [Header("Current SceneR enderSettings")]
         /// <summary>
         /// current RenderSettings params
         /// </summary>
         public AmbientInfo sceneAmbientInfo = new() { isUpdateAmbient = true };
         public UnityFogInfo sceneFogInfo = new() { isUpdateFog = true };
 
+        private void Awake()
+        {
+            // keep last probe
+            lastAmbientProbe = RenderSettings.ambientProbe;
+            SaveSceneInfos();
+        }
+
         private void OnEnable()
         {
             RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
             RenderPipelineManager.beginCameraRendering += RenderPipelineManager_beginCameraRendering;
-
-            // keep last probe
-            lastAmbientProbe = RenderSettings.ambientProbe;
-            SaveSceneInfos();
 
             SceneManagerTools.AddActiveSceneChanged(OnSceneChanged);
         }
@@ -117,12 +132,6 @@
         {
             sceneAmbientInfo.SaveAmbient();
             sceneFogInfo.SaveFog();
-        }
-
-        public void RestoreSceneInfos()
-        {
-            sceneAmbientInfo.ApplyAmbient();
-            sceneFogInfo.ApplyFog();
         }
 
         private void RenderPipelineManager_beginCameraRendering(ScriptableRenderContext arg1, Camera cam)
@@ -159,13 +168,15 @@
 
         private void UpdateAmbients()
         {
-            // update params
-            ambientInfo.Update(this);
-            fogInfo.Update(this);
+            // sync params
+            ambientInfo.Sync(this);
+            fogInfo.Sync(this);
 
             // apply to RenderSettings params
             if (ambientInfo.isUpdateAmbient)
                 ambientInfo.ApplyAmbient();
+            if (ambientInfo.isUpdateAmbientProbe)
+                ambientInfo.ApplyAmbientProbe();
 
             if (fogInfo.isUpdateFog)
                 fogInfo.ApplyFog();

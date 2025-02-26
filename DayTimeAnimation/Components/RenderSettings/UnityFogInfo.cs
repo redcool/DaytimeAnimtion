@@ -12,17 +12,14 @@
         public Color fogColor = Color.gray;
         public FogMode fogMode = FogMode.Linear;
 
-        [Header("Linear Fog")]
+        [Tooltip("Linear Fog start")]
         public float fogStartDistance = 10;
+        [Tooltip("Linear Fog end")]
         public float fogEndDistance = 100;
 
-        [Header("Exp Fog")]
+        [Tooltip("Exp Fog use")]
         public float fogDensity = 0.01f;
 
-        public void Update(DaytimeAmbientParams p)
-        {
-            ReflectionTools.CopyFieldInfoValues(p, this);
-        }
         /// <summary>
         /// Save RenderSettings params
         /// </summary>

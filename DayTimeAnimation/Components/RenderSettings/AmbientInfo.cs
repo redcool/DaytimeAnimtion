@@ -11,12 +11,12 @@
     public class AmbientInfo
     {
         public bool isUpdateAmbient;
+        [Header("Mode")]
+        public AmbientMode ambientMode = AmbientMode.Skybox;
         [Header("Tri colors")]
         [ColorUsage(false,true)] public Color ambientSkyColor;
         [ColorUsage(false, true)] public Color ambientEquatorColor,ambientGroundColor;
 
-        [Header("Mode")]
-        public AmbientMode ambientMode = AmbientMode.Skybox;
 
         [Header("Ambient")]
         public float ambientIntensity = 1;
@@ -24,30 +24,24 @@
         [ColorUsage(false, true)]
         public Color ambientLight;
 
+        public Material skyboxMat;
+        public Light sunSource;
+
+        public Color subtractiveShadowColor;
+        public float haloStrength;
+        public float flareStrength;
+        public int reflectionBounces;
+        public float reflectionIntensity;
+        public Texture customReflectionTexture;
+        public DefaultReflectionMode defaultReflectionMode;
+        public int defaultReflectionResolution;
+
         [Header("AmbientProbe")]
         public bool isUpdateAmbientProbe; 
         [HideInInspector]
         public SphericalHarmonicsL2 lastAmbientProbe;
         public Color shAmbientLight;
         public Light shLight;
-
-        [Header("Env")]
-        public Material skyboxMat;
-        public Light sunSource;
-
-        /// <summary>
-        /// Apply DaytimeForwardParams's params
-        /// </summary>
-        /// <param name="p"></param>
-        public void Update(DaytimeAmbientParams p)
-        {
-            //isUpdateAmbient = p.isUpdateAmbient;
-            //ambientSkyColor = p.ambientSkyColor;
-            //ambientEquatorColor = p.ambientEquatorColor;
-            //ambientGroundColor = p.ambientGroundColor;
-
-            ReflectionTools.CopyFieldInfoValues(p, this);
-        }
 
         /// <summary>
         /// Save RenderSettings params
@@ -65,6 +59,17 @@
 
             sunSource = RenderSettings.sun;
             skyboxMat = RenderSettings.skybox;
+
+            subtractiveShadowColor = RenderSettings.subtractiveShadowColor;
+            haloStrength = RenderSettings.haloStrength;
+            flareStrength = RenderSettings.flareStrength;
+            // reflection
+            reflectionBounces = RenderSettings.reflectionBounces;
+            reflectionIntensity= RenderSettings.reflectionIntensity;
+            customReflectionTexture = RenderSettings.customReflectionTexture;
+            defaultReflectionMode = RenderSettings.defaultReflectionMode;
+            defaultReflectionResolution = RenderSettings.defaultReflectionResolution;
+
         }
 
         public void ApplyAmbient()
@@ -75,6 +80,9 @@
             RenderSettings.ambientIntensity = ambientIntensity;
             RenderSettings.ambientLight = ambientLight;
             RenderSettings.ambientMode = ambientMode;
+
+            RenderSettings.sun = sunSource;
+            RenderSettings.skybox = skyboxMat;
         }
 
         public void ApplyAmbientProbe()

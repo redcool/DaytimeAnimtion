@@ -60,7 +60,7 @@ namespace PowerUtilities
         [MenuItem(FOG_PROP_PATH + "环境(Fog,Ambient)")]
         static void AttachForwardParams()
         {
-            AttachComponent<DaytimeAmbientParams>(Selection.activeGameObject);
+            AttachComponent<DaytimeRenderSettings>(Selection.activeGameObject);
         }
 
 
