@@ -83,6 +83,16 @@
 
             RenderSettings.sun = sunSource;
             RenderSettings.skybox = skyboxMat;
+
+            RenderSettings.subtractiveShadowColor = subtractiveShadowColor;
+            RenderSettings.haloStrength = haloStrength;
+            RenderSettings.flareStrength = flareStrength;
+            // reflection
+            RenderSettings.reflectionBounces = reflectionBounces;
+            RenderSettings.reflectionIntensity = reflectionIntensity;
+            RenderSettings.customReflectionTexture = customReflectionTexture;
+            RenderSettings.defaultReflectionMode = defaultReflectionMode;
+            RenderSettings.defaultReflectionResolution = defaultReflectionResolution;
         }
 
         public void ApplyAmbientProbe()

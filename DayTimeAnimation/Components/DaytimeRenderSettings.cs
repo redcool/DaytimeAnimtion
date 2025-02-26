@@ -27,7 +27,7 @@
         [Tooltip("save current scene Amibent and fog")]
         public bool isSaveSceneRenderSettings;
             
-        bool lastIsUpdateAmbient, lastIsUpdateFog;
+        bool lastIsUpdateAmbient, lastIsUpdateFog,lastIsUpdateAmbientProbe;
         /// <summary>
         /// Ambient Settings
         /// </summary>
@@ -104,8 +104,7 @@
 
         private void Awake()
         {
-            // keep last probe
-            lastAmbientProbe = RenderSettings.ambientProbe;
+
             SaveSceneInfos();
         }
 
@@ -130,16 +129,19 @@
 
         public void SaveSceneInfos()
         {
+            // keep last probe
+            lastAmbientProbe = RenderSettings.ambientProbe;
+
             sceneAmbientInfo.SaveAmbient();
             sceneFogInfo.SaveFog();
         }
 
         private void RenderPipelineManager_beginCameraRendering(ScriptableRenderContext arg1, Camera cam)
         {
-            //if (cam.CompareTag("MainCamera"))
-            {
-                ambientInfo.ApplyAmbientProbe();
-            }
+            //if(ambientInfo.isUpdateAmbientProbe)
+            //{
+            //    ambientInfo.ApplyAmbientProbe();
+            //}
         }
 
         // Update is called once per frame
@@ -158,6 +160,11 @@
             if (CompareTools.CompareAndSet(ref lastIsUpdateAmbient, ref isUpdateAmbient) && !lastIsUpdateAmbient)
             {
                 sceneAmbientInfo.ApplyAmbient();
+            }
+
+            if(CompareTools.CompareAndSet(ref lastIsUpdateAmbientProbe,ref isUpdateAmbientProbe) && !lastIsUpdateAmbientProbe)
+            {
+                RenderSettings.ambientProbe = lastAmbientProbe;
             }
 
             if(CompareTools.CompareAndSet(ref lastIsUpdateFog,ref isUpdateFog) && !lastIsUpdateFog)
