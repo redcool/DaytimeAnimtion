@@ -110,9 +110,6 @@
 
         private void OnEnable()
         {
-            RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
-            RenderPipelineManager.beginCameraRendering += RenderPipelineManager_beginCameraRendering;
-
             SceneManagerTools.AddActiveSceneChanged(OnSceneChanged);
         }
 
@@ -123,7 +120,6 @@
 
         private void OnDisable()
         {
-            RenderPipelineManager.beginCameraRendering -= RenderPipelineManager_beginCameraRendering;
             SceneManagerTools.RemoveActiveSceneChanged(OnSceneChanged);
         }
 
@@ -134,14 +130,6 @@
 
             sceneAmbientInfo.SaveAmbient();
             sceneFogInfo.SaveFog();
-        }
-
-        private void RenderPipelineManager_beginCameraRendering(ScriptableRenderContext arg1, Camera cam)
-        {
-            //if(ambientInfo.isUpdateAmbientProbe)
-            //{
-            //    ambientInfo.ApplyAmbientProbe();
-            //}
         }
 
         // Update is called once per frame
