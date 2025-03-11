@@ -31,7 +31,7 @@
         /// <summary>
         /// Ambient Settings
         /// </summary>
-        [Header("--- RenderSettings/Envronment")]
+        [Header("--- RenderSettings/Environment")]
         [Tooltip("uncheck use sceneAmbientInfo")]
         public bool isUpdateAmbient;
         [Tooltip("Mode")]
