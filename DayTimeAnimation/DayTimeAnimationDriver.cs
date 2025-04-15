@@ -1,15 +1,19 @@
 ﻿namespace PowerUtilities
 {
+#if UNITY_EDITOR
+    using UnityEditor;
+#endif
     using System;
     using System.Collections;
     using System.Collections.Generic;
     using UnityEngine;
+    using UnityEngine.SceneManagement;
 
 #if UNITY_EDITOR
-    using UnityEditor;
     [CustomEditor(typeof(DayTimeAnimationDriver))]
     public class DayTimeAnimationDriverEditor : Editor
     {
+        public bool isShowDaytimeItems;
         public override void OnInspectorGUI()
         {
             base.OnInspectorGUI();
@@ -22,9 +26,9 @@
 
         void ShowExistItems(DayTimeAnimationDriver inst)
         {
-            inst.isShowDaytimeItems = EditorGUILayout.BeginFoldoutHeaderGroup(inst.isShowDaytimeItems, "DayTime Items");
+            isShowDaytimeItems = EditorGUILayout.BeginFoldoutHeaderGroup(isShowDaytimeItems, "DayTime Items");
 
-            if (inst.isShowDaytimeItems)
+            if (isShowDaytimeItems)
             {
                 if (!EditorApplication.isPlaying)
                 {
@@ -53,10 +57,22 @@
 
 
         [Header("2.0.1")]
+
+        [HelpBox]
+        public string helpBox = "Drive all DayTimeAnimationItem";
+
+        [Header("LifeTime")]
+        [Tooltip("keep this driver across scenes")]
+        public bool isDontDestroyOnLoad;
+
+        [Tooltip("Stop run daytime when scene unload, continue run when new scene loaded")]
+        public bool isStopDaytimeWhenSceneUnloaded = true;
+
         [Header("(游戏)一天是(现实中)多少秒?")]
         [Min(1)]
         public float secondsADay = 30;
 
+        [Tooltip("auto run daytime")]
         public bool autoDaytime;
         bool lastAutoDaytime;
 
@@ -68,18 +84,39 @@
         public UpdateMode updateMode = UpdateMode.Frame2;
 
         float elapsedSecs;
-        [Header("Debug Info")]
-        public float hour;
 
-        [HideInInspector]
-        public bool isShowDaytimeItems;
+        [Header("Runtime Info")]
+        [Tooltip("current hour,24h format")]
+        [EditorDisableGroup]
+        public float hour; //[0,24]
+        // hour integer
+        [EditorDisableGroup]
+        public int hourId; //[0,24]
+        int lastHourId=-1;
 
-        public static DayTimeAnimationDriver Instance;
-
-        public static event Action OnAnimationUpdate;
+        [EditorDisableGroup]
+        [Tooltip("Total hours from start")]
+        public int totalHours;
 
         int currentFrame;
 
+        /// <summary>
+        /// static,events
+        /// </summary>
+        public static DayTimeAnimationDriver Instance;
+
+        /// <summary>
+        /// When animation update, call this event
+        /// </summary>
+        public static event Action OnAnimationUpdate;
+        /// <summary>
+        /// When hour changed, call this event
+        /// </summary>
+        public static event Action<int> OnHourChanged;
+
+        /// <summary>
+        ///instance list 
+        /// </summary>
         static List<DayTimeAnimationItem> animList = new List<DayTimeAnimationItem>();
         public static List<DayTimeAnimationItem> AnimList => animList;
         public static void Add(DayTimeAnimationItem item)
@@ -100,11 +137,39 @@
         void Awake()
         {
             Instance = this;
+
+            if (isDontDestroyOnLoad)
+            {
+                DontDestroyOnLoad(gameObject);
+            }
+
+
+            SceneManagerTools.AddSceneUnloaded(OnSceneUnload);
+            SceneManagerTools.AddSceneLoaded(OnSceneLoaded);
+        }
+
+        void OnSceneUnload(Scene scene)
+        {
+            if (isStopDaytimeWhenSceneUnloaded)
+            {
+                autoDaytime = false;
+            }
+        }
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (isStopDaytimeWhenSceneUnloaded)
+            {
+                autoDaytime = true;
+            }
         }
         void OnDestroy()
         {
             Instance = null;
             OnAnimationUpdate = null;
+            OnHourChanged = null;
+
+            SceneManagerTools.RemoveSceneUnloaded(OnSceneUnload);
+            SceneManagerTools.RemoveSceneLoaded(OnSceneLoaded);
         }
         // Update is called once per frame
         void Update()
@@ -116,8 +181,9 @@
 
             timeRate -= Mathf.Floor(timeRate);
 
-            hour = timeRate * 24;
+            UpdateHour();
 
+            /// ------------ drive all items
             if (CanUpdate())
             {
                 UpdateAnimations();
@@ -127,12 +193,23 @@
             }
         }
 
+        private void UpdateHour()
+        {
+            hour = timeRate * 24;
+            hourId = (int)hour;
+            // check int hour 
+            if (CompareTools.CompareAndSet(ref lastHourId, hourId))
+            {
+                totalHours += 1;
+                OnHourChanged?.Invoke(hourId);
+            }
+        }
+
         private void SyncElapsedSecs()
         {
-            if (lastAutoDaytime != autoDaytime)
+            if (CompareTools.CompareAndSet(ref lastAutoDaytime, autoDaytime))
             {
                 elapsedSecs = timeRate * secondsADay;
-                lastAutoDaytime = autoDaytime;
             }
         }
 
@@ -150,10 +227,7 @@
                     item.UpdateAnimation(timeRate);
             }
 
-            if (OnAnimationUpdate != null)
-            {
-                OnAnimationUpdate();
-            }
+            OnAnimationUpdate?.Invoke();
         }
 
         void UpdateTimeRate()

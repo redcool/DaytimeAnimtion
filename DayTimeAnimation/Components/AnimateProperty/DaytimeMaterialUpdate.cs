@@ -12,6 +12,9 @@
     [ExecuteAlways]
     public class DaytimeMaterialUpdate : MonoBehaviour
     {
+        [HelpBox]
+        public string helpBox = "Update Material Properties by DayTimeAnimationDriver";
+
         public Vector4 v;
         public Matrix4x4 m;
 
