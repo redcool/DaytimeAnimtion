@@ -70,19 +70,18 @@ namespace PowerUtilities
         {
             var sum = weatherSettingsList.Sum(setting => setting.probability);
             var randomValue = Random.Range(0, sum);
-            Debug.Log(randomValue);
 
-            foreach (var setting in weatherSettingsList)
-            {
-                if(setting.probabilityRange.x <= randomValue && setting.probabilityRange.y >= randomValue)
-                {
-                    return setting;
-                }
-            }
-            return null;
-            //return weatherSettingsList
-            //    .Where(setting => setting.probabilityRange.x <= randomValue && setting.probabilityRange.y >= randomValue)
-            //    .FirstOrDefault();
+            //foreach (var setting in weatherSettingsList)
+            //{
+            //    if(setting.probabilityRange.x <= randomValue && setting.probabilityRange.y >= randomValue)
+            //    {
+            //        return setting;
+            //    }
+            //}
+            //return null;
+            return weatherSettingsList
+                .Where(setting => setting.probabilityRange.x <= randomValue && setting.probabilityRange.y >= randomValue)
+                .FirstOrDefault();
         }
 
         /// <summary>
@@ -135,7 +134,6 @@ namespace PowerUtilities
             while (rate < 1)
             {
                 rate = (Time.time - startTime) / curWeatherSettings.fadingTime;
-                Debug.Log($"weather fading: {rate}");
 
                 //yield return null;
                 ReflectionTools.CopyFieldInfoValues(curWeatherSettings, weatherControl,onSetValue: (readValue, writeValue) =>
@@ -161,14 +159,13 @@ namespace PowerUtilities
                     }
 
                     // default
-                    return writeValue;
+                    return readValue;
                 });
 
                 yield return 0;
             }
 
             lastCoroutine = null;
-            Debug.Log($"weather fading finish");
         }
     }
 }

@@ -65,7 +65,7 @@
         [Tooltip("keep this driver across scenes")]
         public bool isDontDestroyOnLoad;
 
-        [Tooltip("Stop run daytime when scene unload, continue run when new scene loaded")]
+        [Tooltip("When autoDaytime is true, stop run daytime when scene unload, continue run when new scene loaded")]
         public bool isStopDaytimeWhenSceneUnloaded = true;
 
         [Header("(游戏)一天是(现实中)多少秒?")]
@@ -142,34 +142,28 @@
             {
                 DontDestroyOnLoad(gameObject);
             }
-
-
-            SceneManagerTools.AddSceneUnloaded(OnSceneUnload);
-            SceneManagerTools.AddSceneLoaded(OnSceneLoaded);
         }
 
-        void OnSceneUnload(Scene scene)
+        private void OnEnable()
         {
-            if (isStopDaytimeWhenSceneUnloaded)
+            if (autoDaytime)
             {
-                autoDaytime = false;
+                SceneManagerTools.AddSceneUnloaded(OnSceneUnload);
+                SceneManagerTools.AddSceneLoaded(OnSceneLoaded);
             }
         }
-        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+
+        private void OnDisable()
         {
-            if (isStopDaytimeWhenSceneUnloaded)
-            {
-                autoDaytime = true;
-            }
+            SceneManagerTools.RemoveSceneUnloaded(OnSceneUnload);
+            SceneManagerTools.RemoveSceneLoaded(OnSceneLoaded);
         }
+
         void OnDestroy()
         {
             Instance = null;
             OnAnimationUpdate = null;
             OnHourChanged = null;
-
-            SceneManagerTools.RemoveSceneUnloaded(OnSceneUnload);
-            SceneManagerTools.RemoveSceneLoaded(OnSceneLoaded);
         }
         // Update is called once per frame
         void Update()
@@ -192,7 +186,20 @@
                 lastRate = timeRate;
             }
         }
-
+        void OnSceneUnload(Scene scene)
+        {
+            if (isStopDaytimeWhenSceneUnloaded)
+            {
+                autoDaytime = false;
+            }
+        }
+        void OnSceneLoaded(Scene scene, LoadSceneMode mode)
+        {
+            if (isStopDaytimeWhenSceneUnloaded)
+            {
+                autoDaytime = true;
+            }
+        }
         private void UpdateHour()
         {
             hour = timeRate * 24;
