@@ -76,7 +76,7 @@
         public bool autoDaytime;
         bool lastAutoDaytime;
 
-        [Header("昼夜时间比例(0:夜,1:昼)")]
+        [Header("昼夜时间比例[0h - 24h]")]
         [Range(0, 1)] public float timeRate;
         float lastRate;
 
@@ -92,7 +92,7 @@
         // hour integer
         [EditorDisableGroup]
         public int hourId; //[0,24]
-        int lastHourId=-1;
+        int lastHourId=0;
 
         [EditorDisableGroup]
         [Tooltip("Total hours from start")]
