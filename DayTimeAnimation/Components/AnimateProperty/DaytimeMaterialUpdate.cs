@@ -31,10 +31,10 @@
         [ListItemDraw("name:,name,value:,value", "50,100,50,")]
         public List<ShaderValue<Texture>> textureValues = new List<ShaderValue<Texture>>();
 
-        [Header("Shader Lod")]
-        [Tooltip("update material shader maximumLOD")]
-        public bool isUpdateShaderLod;
-        public int materialShaderMaxLod;
+        [Header("Material Shader Lod")]
+        [Tooltip("update materialList shader maxLod")]
+        [ListItemDraw("on:,isUpdateShaderMaxLod,mats:,materialList,lod:,shaderMaxLod", "50,100,50,.5,50,100", rowCountArrayPropName = "materialList")]
+        public List<ShaderLodInfo> materialShaderLodList = new();
 
         public void OnEnable()
         {
@@ -66,8 +66,11 @@
             foreach (var item in textureValues)
                 if (item.IsValid) mat.SetTexture(item.name, item.value);
 
-            if(mat.shader && isUpdateShaderLod)
-                mat.shader.maximumLOD = materialShaderMaxLod;
+            foreach (var item in materialShaderLodList)
+            {
+                if (item != null)
+                    item.UpdateShaderLods();
+            }
         }
 
         void Update()
