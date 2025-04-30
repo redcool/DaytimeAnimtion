@@ -15,9 +15,6 @@
         [HelpBox]
         public string helpBox = "Update Material Properties by DayTimeAnimationDriver";
 
-        public Vector4 v;
-        public Matrix4x4 m;
-
         public Material mat;
         public bool isRunInUpdate;
 
@@ -33,6 +30,11 @@
 
         [ListItemDraw("name:,name,value:,value", "50,100,50,")]
         public List<ShaderValue<Texture>> textureValues = new List<ShaderValue<Texture>>();
+
+        [Header("Shader Lod")]
+        [Tooltip("update material shader maximumLOD")]
+        public bool isUpdateShaderLod;
+        public int materialShaderMaxLod;
 
         public void OnEnable()
         {
@@ -63,6 +65,9 @@
 
             foreach (var item in textureValues)
                 if (item.IsValid) mat.SetTexture(item.name, item.value);
+
+            if(mat.shader && isUpdateShaderLod)
+                mat.shader.maximumLOD = materialShaderMaxLod;
         }
 
         void Update()
